@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { AuthProvider, useAuth } from './AuthContext';
-import Auth from './Auth';
-import MatchList from './MatchList';
-import PredictionForm from './PredictionForm';
-import Leaderboard from './Leaderboard';
-import AdminPanel from './AdminPanel';
+import { AuthProvider, useAuth } from "./AuthContext";
+import Auth from "./Auth";
+import MatchList from "./MatchList";
+import PredictionForm from "./PredictionForm";
+import Leaderboard from "./Leaderboard";
+import AdminPanel from "./AdminPanel";
 import "./style.css";
 
 function MainApp() {
   const { user, signOut, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('matches');
+  const [activeTab, setActiveTab] = useState("matches");
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [existingPrediction, setExistingPrediction] = useState(null);
   const [showPredictionForm, setShowPredictionForm] = useState(false);
@@ -28,7 +28,7 @@ function MainApp() {
   };
 
   const handlePredictionSaved = () => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
     handleClosePredictionForm();
   };
 
@@ -53,31 +53,31 @@ function MainApp() {
 
       <nav className="app-nav">
         <button
-          className={`nav-btn ${activeTab === 'matches' ? 'active' : ''}`}
-          onClick={() => setActiveTab('matches')}
+          className={`nav-btn ${activeTab === "matches" ? "active" : ""}`}
+          onClick={() => setActiveTab("matches")}
         >
           Matches
         </button>
         <button
-          className={`nav-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('leaderboard')}
+          className={`nav-btn ${activeTab === "leaderboard" ? "active" : ""}`}
+          onClick={() => setActiveTab("leaderboard")}
         >
           Leaderboard
         </button>
         <button
-          className={`nav-btn ${activeTab === 'admin' ? 'active' : ''}`}
-          onClick={() => setActiveTab('admin')}
+          className={`nav-btn ${activeTab === "admin" ? "active" : ""}`}
+          onClick={() => setActiveTab("admin")}
         >
           Admin
         </button>
       </nav>
 
       <main className="app-main">
-        {activeTab === 'matches' && (
+        {activeTab === "matches" && (
           <MatchList key={refreshKey} onSelectMatch={handleSelectMatch} />
         )}
-        {activeTab === 'leaderboard' && <Leaderboard key={refreshKey} />}
-        {activeTab === 'admin' && <AdminPanel key={refreshKey} />}
+        {activeTab === "leaderboard" && <Leaderboard key={refreshKey} />}
+        {activeTab === "admin" && <AdminPanel key={refreshKey} />}
       </main>
 
       {showPredictionForm && selectedMatch && (

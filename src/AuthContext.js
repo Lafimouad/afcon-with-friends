@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from './supabaseClient';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "./supabaseClient";
 
 const AuthContext = createContext({});
 
@@ -15,7 +15,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -30,15 +32,13 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (!error && data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username: username,
-            total_points: 0,
-          },
-        ]);
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: data.user.id,
+          username: username,
+          total_points: 0,
+        },
+      ]);
 
       if (profileError) throw profileError;
     }

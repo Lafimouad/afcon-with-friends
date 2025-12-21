@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
-import { calculatePoints } from './pointsCalculator';
+import React, { useState, useEffect } from "react";
+import { supabase } from "./supabaseClient";
+import { calculatePoints } from "./pointsCalculator";
 
 export default function AdminPanel() {
   const [matches, setMatches] = useState([]);
@@ -8,7 +8,7 @@ export default function AdminPanel() {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadMatches();
@@ -17,45 +17,47 @@ export default function AdminPanel() {
   const loadMatches = async () => {
     try {
       const { data, error } = await supabase
-        .from('matches')
-        .select(`
+        .from("matches")
+        .select(
+          `
           *,
           home_team:teams!matches_home_team_id_fkey(name, flag_emoji),
           away_team:teams!matches_away_team_id_fkey(name, flag_emoji)
-        `)
-        .eq('is_completed', false)
-        .order('match_date', { ascending: true });
+        `
+        )
+        .eq("is_completed", false)
+        .order("match_date", { ascending: true });
 
       if (error) throw error;
       setMatches(data || []);
     } catch (err) {
-      console.error('Error loading matches:', err);
+      console.error("Error loading matches:", err);
     }
   };
 
   const handleSubmitResult = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // Update match result
       const { error: updateError } = await supabase
-        .from('matches')
+        .from("matches")
         .update({
           home_score: homeScore,
           away_score: awayScore,
           is_completed: true,
         })
-        .eq('id', selectedMatch.id);
+        .eq("id", selectedMatch.id);
 
       if (updateError) throw updateError;
 
       // Fetch all predictions for this match
       const { data: predictions, error: predError } = await supabase
-        .from('predictions')
-        .select('*')
-        .eq('match_id', selectedMatch.id);
+        .from("predictions")
+        .select("*")
+        .eq("match_id", selectedMatch.id);
 
       if (predError) throw predError;
 
@@ -72,24 +74,24 @@ export default function AdminPanel() {
         // Update prediction points
         updatePromises.push(
           supabase
-            .from('predictions')
+            .from("predictions")
             .update({ points_earned: points })
-            .eq('id', prediction.id)
+            .eq("id", prediction.id)
             .then(async () => {
               // Update user's total points
               const { data: profile, error: profileFetchError } = await supabase
-                .from('profiles')
-                .select('total_points')
-                .eq('id', prediction.user_id)
+                .from("profiles")
+                .select("total_points")
+                .eq("id", prediction.user_id)
                 .maybeSingle();
 
               if (profileFetchError) throw profileFetchError;
 
               if (profile) {
                 const { error: profileUpdateError } = await supabase
-                  .from('profiles')
+                  .from("profiles")
                   .update({ total_points: profile.total_points + points })
-                  .eq('id', prediction.user_id);
+                  .eq("id", prediction.user_id);
 
                 if (profileUpdateError) throw profileUpdateError;
               }
@@ -107,7 +109,7 @@ export default function AdminPanel() {
       await loadMatches();
     } catch (err) {
       setError(`Failed to save result: ${err.message}`);
-      console.error('Error saving match result:', err);
+      console.error("Error saving match result:", err);
     } finally {
       setLoading(false);
     }
@@ -121,12 +123,16 @@ export default function AdminPanel() {
         <div className="result-form-container">
           <div className="match-info">
             <div className="team-info">
-              <span className="team-flag">{selectedMatch.home_team.flag_emoji}</span>
+              <span className="team-flag">
+                {selectedMatch.home_team.flag_emoji}
+              </span>
               <span className="team-name">{selectedMatch.home_team.name}</span>
             </div>
             <span className="vs-text">VS</span>
             <div className="team-info">
-              <span className="team-flag">{selectedMatch.away_team.flag_emoji}</span>
+              <span className="team-flag">
+                {selectedMatch.away_team.flag_emoji}
+              </span>
               <span className="team-name">{selectedMatch.away_team.name}</span>
             </div>
           </div>
@@ -170,18 +176,14 @@ export default function AdminPanel() {
                   setSelectedMatch(null);
                   setHomeScore(0);
                   setAwayScore(0);
-                  setError('');
+                  setError("");
                 }}
                 disabled={loading}
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="btn-primary"
-                disabled={loading}
-              >
-                {loading ? 'Saving...' : 'Save Result'}
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? "Saving..." : "Save Result"}
               </button>
             </div>
           </form>
