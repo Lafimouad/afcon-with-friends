@@ -40,22 +40,44 @@ export default function MatchList({ onSelectMatch }) {
         predMap[pred.match_id] = pred;
       });
 
-      // Get unique rounds and determine current round
-      const rounds = [
+      // Get unique rounds
+      const allRounds = [
         ...new Set(matchesData?.map((m) => m.round || 1) || []),
       ].sort();
-      setAvailableRounds(rounds);
 
-      // Auto-select the current/next round (first incomplete round)
-      const currentRound =
-        rounds.find((round) => {
+      setAvailableRounds(allRounds);
+
+      // Auto-select the current/next round (first incomplete round that's unlocked)
+      let currentRound = allRounds[0];
+      for (const round of allRounds) {
+        const isUnlocked =
+          round === 1 ||
+          (() => {
+            const prevRound = round - 1;
+            const prevRoundMatches = matchesData.filter(
+              (m) => (m.round || 1) === prevRound
+            );
+            return (
+              prevRoundMatches.length > 0 &&
+              prevRoundMatches.every((m) => m.is_completed)
+            );
+          })();
+
+        if (isUnlocked) {
           const roundMatches = matchesData.filter(
             (m) => (m.round || 1) === round
           );
-          return roundMatches.some(
-            (m) => !m.is_completed || new Date(m.match_date) > new Date()
-          );
-        }) || rounds[rounds.length - 1]; // Default to last round if all completed
+          if (
+            roundMatches.some(
+              (m) => !m.is_completed || new Date(m.match_date) > new Date()
+            )
+          ) {
+            currentRound = round;
+            break;
+          }
+          currentRound = round; // If all completed, still select this round
+        }
+      }
 
       setSelectedRound(currentRound);
       setMatches(matchesData || []);
@@ -82,6 +104,19 @@ export default function MatchList({ onSelectMatch }) {
     return new Date(match.match_date) > new Date() && !match.is_completed;
   };
 
+  // Check if a round is unlocked (previous round completed)
+  const isRoundUnlocked = (round) => {
+    if (round === 1) return true;
+    const prevRound = round - 1;
+    const prevRoundMatches = matches.filter(
+      (m) => (m.round || 1) === prevRound
+    );
+    return (
+      prevRoundMatches.length > 0 &&
+      prevRoundMatches.every((m) => m.is_completed)
+    );
+  };
+
   // Filter matches by selected round
   const roundMatches = matches.filter((m) => (m.round || 1) === selectedRound);
 
@@ -95,17 +130,22 @@ export default function MatchList({ onSelectMatch }) {
         <h2>Matches</h2>
         {availableRounds.length > 1 && (
           <div className="round-selector">
-            {availableRounds.map((round) => (
-              <button
-                key={round}
-                className={`round-btn ${
-                  selectedRound === round ? "active" : ""
-                }`}
-                onClick={() => setSelectedRound(round)}
-              >
-                Round {round}
-              </button>
-            ))}
+            {availableRounds.map((round) => {
+              const unlocked = isRoundUnlocked(round);
+              return (
+                <button
+                  key={round}
+                  className={`round-btn ${
+                    selectedRound === round ? "active" : ""
+                  } ${!unlocked ? "disabled" : ""}`}
+                  onClick={() => unlocked && setSelectedRound(round)}
+                  disabled={!unlocked}
+                  title={!unlocked ? "Complete previous round to unlock" : ""}
+                >
+                  Round {round} {!unlocked && "🔒"}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

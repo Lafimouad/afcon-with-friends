@@ -33,16 +33,42 @@ export default function AdminPanel() {
 
       if (error) throw error;
 
-      // Get unique rounds
-      const rounds = [...new Set(data?.map((m) => m.round || 1) || [])].sort();
-      setAvailableRounds(rounds);
+      // Get all rounds (including completed matches) to check progression
+      const { data: allMatchesData } = await supabase
+        .from("matches")
+        .select("round, is_completed")
+        .order("round", { ascending: true });
 
-      // Auto-select the current/next round
-      const currentRound =
-        rounds.find((round) => {
+      const allRounds = [
+        ...new Set(allMatchesData?.map((m) => m.round || 1) || []),
+      ].sort();
+
+      setAvailableRounds(allRounds);
+
+      // Auto-select the first unlocked round with incomplete matches
+      let currentRound = allRounds[0];
+      for (const round of allRounds) {
+        const isUnlocked =
+          round === 1 ||
+          (() => {
+            const prevRound = round - 1;
+            const prevRoundMatches = allMatchesData.filter(
+              (m) => (m.round || 1) === prevRound
+            );
+            return (
+              prevRoundMatches.length > 0 &&
+              prevRoundMatches.every((m) => m.is_completed)
+            );
+          })();
+
+        if (isUnlocked) {
           const roundMatches = data.filter((m) => (m.round || 1) === round);
-          return roundMatches.some((m) => !m.is_completed);
-        }) || rounds[0];
+          if (roundMatches.some((m) => !m.is_completed)) {
+            currentRound = round;
+            break;
+          }
+        }
+      }
 
       setSelectedRound(currentRound);
       setMatches(data || []);
@@ -131,6 +157,20 @@ export default function AdminPanel() {
     }
   };
 
+  // Check if a round is unlocked (previous round completed)
+  const isRoundUnlocked = (round) => {
+    if (round === 1) return true;
+    const prevRound = round - 1;
+    const prevRoundMatches = matches.filter(
+      (m) => (m.round || 1) === prevRound
+    );
+    // For admin, also check all matches from DB
+    return (
+      prevRoundMatches.length === 0 ||
+      prevRoundMatches.every((m) => m.is_completed)
+    );
+  };
+
   // Filter matches by selected round
   const roundMatches = matches.filter((m) => (m.round || 1) === selectedRound);
 
@@ -140,17 +180,22 @@ export default function AdminPanel() {
         <h2>Admin Panel - Enter Match Results</h2>
         {availableRounds.length > 1 && (
           <div className="round-selector">
-            {availableRounds.map((round) => (
-              <button
-                key={round}
-                className={`round-btn ${
-                  selectedRound === round ? "active" : ""
-                }`}
-                onClick={() => setSelectedRound(round)}
-              >
-                Round {round}
-              </button>
-            ))}
+            {availableRounds.map((round) => {
+              const unlocked = isRoundUnlocked(round);
+              return (
+                <button
+                  key={round}
+                  className={`round-btn ${
+                    selectedRound === round ? "active" : ""
+                  } ${!unlocked ? "disabled" : ""}`}
+                  onClick={() => unlocked && setSelectedRound(round)}
+                  disabled={!unlocked}
+                  title={!unlocked ? "Complete previous round to unlock" : ""}
+                >
+                  Round {round} {!unlocked && "🔒"}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
