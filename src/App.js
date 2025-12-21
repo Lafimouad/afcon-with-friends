@@ -15,6 +15,9 @@ function MainApp() {
   const [showPredictionForm, setShowPredictionForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Admin email - only this user can see Admin tab
+  const isAdmin = user?.email === "mouadh@afcon.local";
+
   const handleSelectMatch = (match, prediction) => {
     setSelectedMatch(match);
     setExistingPrediction(prediction);
@@ -64,12 +67,14 @@ function MainApp() {
         >
           Leaderboard
         </button>
-        <button
-          className={`nav-btn ${activeTab === "admin" ? "active" : ""}`}
-          onClick={() => setActiveTab("admin")}
-        >
-          Admin
-        </button>
+        {isAdmin && (
+          <button
+            className={`nav-btn ${activeTab === "admin" ? "active" : ""}`}
+            onClick={() => setActiveTab("admin")}
+          >
+            Admin
+          </button>
+        )}
       </nav>
 
       <main className="app-main">
@@ -77,7 +82,7 @@ function MainApp() {
           <MatchList key={refreshKey} onSelectMatch={handleSelectMatch} />
         )}
         {activeTab === "leaderboard" && <Leaderboard key={refreshKey} />}
-        {activeTab === "admin" && <AdminPanel key={refreshKey} />}
+        {activeTab === "admin" && isAdmin && <AdminPanel key={refreshKey} />}
       </main>
 
       {showPredictionForm && selectedMatch && (
