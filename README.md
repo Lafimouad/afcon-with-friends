@@ -1,0 +1,1 @@
+afcon-with-friends
