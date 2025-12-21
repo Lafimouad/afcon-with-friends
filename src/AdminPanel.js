@@ -9,6 +9,8 @@ export default function AdminPanel() {
   const [awayScore, setAwayScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedRound, setSelectedRound] = useState(null);
+  const [availableRounds, setAvailableRounds] = useState([]);
 
   useEffect(() => {
     loadMatches();
@@ -26,9 +28,23 @@ export default function AdminPanel() {
         `
         )
         .eq("is_completed", false)
+        .order("round", { ascending: true })
         .order("match_date", { ascending: true });
 
       if (error) throw error;
+
+      // Get unique rounds
+      const rounds = [...new Set(data?.map((m) => m.round || 1) || [])].sort();
+      setAvailableRounds(rounds);
+
+      // Auto-select the current/next round
+      const currentRound =
+        rounds.find((round) => {
+          const roundMatches = data.filter((m) => (m.round || 1) === round);
+          return roundMatches.some((m) => !m.is_completed);
+        }) || rounds[0];
+
+      setSelectedRound(currentRound);
       setMatches(data || []);
     } catch (err) {
       console.error("Error loading matches:", err);
@@ -115,9 +131,29 @@ export default function AdminPanel() {
     }
   };
 
+  // Filter matches by selected round
+  const roundMatches = matches.filter((m) => (m.round || 1) === selectedRound);
+
   return (
     <div className="admin-panel">
-      <h2>Admin Panel - Enter Match Results</h2>
+      <div className="round-header">
+        <h2>Admin Panel - Enter Match Results</h2>
+        {availableRounds.length > 1 && (
+          <div className="round-selector">
+            {availableRounds.map((round) => (
+              <button
+                key={round}
+                className={`round-btn ${
+                  selectedRound === round ? "active" : ""
+                }`}
+                onClick={() => setSelectedRound(round)}
+              >
+                Round {round}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {selectedMatch ? (
         <div className="result-form-container">
@@ -190,10 +226,10 @@ export default function AdminPanel() {
         </div>
       ) : (
         <div className="matches-list">
-          {matches.length === 0 ? (
-            <p>No pending matches to enter results for.</p>
+          {roundMatches.length === 0 ? (
+            <p>No pending matches to enter results for this round.</p>
           ) : (
-            matches.map((match) => (
+            roundMatches.map((match) => (
               <div key={match.id} className="admin-match-card">
                 <div className="match-teams">
                   <span>
