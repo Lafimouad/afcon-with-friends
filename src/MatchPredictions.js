@@ -122,13 +122,13 @@ export default function MatchPredictions({ match, onClose }) {
                       </span>
                     </div>
                     <div className="prediction-score">
+                      {isCorrect && (
+                        <span className="correct-badge">✓ Exact!</span>
+                      )}
                       <span className="score-display">
                         {pred.predicted_home_score} -{" "}
                         {pred.predicted_away_score}
                       </span>
-                      {isCorrect && (
-                        <span className="correct-badge">✓ Exact!</span>
-                      )}
                     </div>
                     {match.is_completed && (
                       <div className="prediction-points">

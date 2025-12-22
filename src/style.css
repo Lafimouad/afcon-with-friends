@@ -859,20 +859,10 @@ body {
 
 .prediction-score {
   flex: 1;
-  text-align: center;
-  display: flex;
+  display: grid;
+  grid-template-columns: 80px 1fr 80px;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-}
-
-.score-display {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c5364;
-  padding: 0.25rem 0.75rem;
-  background: white;
-  border-radius: 6px;
 }
 
 .correct-badge {
@@ -882,6 +872,22 @@ body {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-weight: 600;
+  white-space: nowrap;
+  grid-column: 1;
+  justify-self: end;
+}
+
+.score-display {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c5364;
+  padding: 0.25rem 0.75rem;
+  background: white;
+  border-radius: 6px;
+  min-width: 70px;
+  text-align: center;
+  grid-column: 2;
+  justify-self: center;
 }
 
 .prediction-points {
