@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import { useAuth } from "./AuthContext";
 
-export default function MatchList({ onSelectMatch }) {
+export default function MatchList({ onSelectMatch, onViewPredictions }) {
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -102,6 +102,10 @@ export default function MatchList({ onSelectMatch }) {
 
   const canPredict = (match) => {
     return new Date(match.match_date) > new Date() && !match.is_completed;
+  };
+
+  const hasMatchStarted = (match) => {
+    return new Date(match.match_date) <= new Date();
   };
 
   // Check if a round is unlocked (previous round completed)
@@ -216,6 +220,12 @@ export default function MatchList({ onSelectMatch }) {
                           {prediction.points_earned} pts
                         </span>
                       )}
+                      <button
+                        className="btn-secondary btn-small"
+                        onClick={() => onViewPredictions(match)}
+                      >
+                        View All Predictions
+                      </button>
                     </div>
                   ) : prediction ? (
                     <div className="match-status">
@@ -228,6 +238,14 @@ export default function MatchList({ onSelectMatch }) {
                           Edit
                         </button>
                       )}
+                      {hasMatchStarted(match) && (
+                        <button
+                          className="btn-secondary btn-small"
+                          onClick={() => onViewPredictions(match)}
+                        >
+                          View All
+                        </button>
+                      )}
                     </div>
                   ) : isPredictable ? (
                     <button
@@ -237,7 +255,17 @@ export default function MatchList({ onSelectMatch }) {
                       Make Prediction
                     </button>
                   ) : (
-                    <span className="status-badge locked">Locked</span>
+                    <div className="match-status">
+                      <span className="status-badge locked">Locked</span>
+                      {hasMatchStarted(match) && (
+                        <button
+                          className="btn-secondary btn-small"
+                          onClick={() => onViewPredictions(match)}
+                        >
+                          View All
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

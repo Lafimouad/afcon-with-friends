@@ -753,3 +753,169 @@ body {
     text-align: center;
   }
 }
+
+/* Match Predictions Modal */
+.predictions-modal {
+  max-width: 600px;
+}
+
+.match-info-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+}
+
+.team-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.team-vs .team-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.team-vs .vs-text {
+  color: #999;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.final-result {
+  text-align: center;
+  padding: 0.75rem;
+  background: #e6f0f3;
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+.info-message {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.match-start-time {
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #2c5364;
+  font-weight: 500;
+}
+
+.predictions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.prediction-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.prediction-item:hover {
+  background: #e6f0f3;
+}
+
+.prediction-item.current-user {
+  background: #e6f0f3;
+  border-color: #2c5364;
+}
+
+.prediction-item.correct {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: #28a745;
+}
+
+.prediction-user {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.username {
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prediction-score {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.score-display {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c5364;
+  padding: 0.25rem 0.75rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.correct-badge {
+  background: #28a745;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.prediction-points {
+  min-width: 60px;
+  text-align: right;
+}
+
+.prediction-points .points {
+  background: #2c5364;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.no-predictions {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 600px) {
+  .prediction-item {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .prediction-user,
+  .prediction-score,
+  .prediction-points {
+    width: 100%;
+    justify-content: center;
+  }
+}

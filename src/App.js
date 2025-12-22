@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./AuthContext";
 import Auth from "./Auth";
 import MatchList from "./MatchList";
 import PredictionForm from "./PredictionForm";
+import MatchPredictions from "./MatchPredictions";
 import Leaderboard from "./Leaderboard";
 import AdminPanel from "./AdminPanel";
 import "./style.css";
@@ -13,6 +14,7 @@ function MainApp() {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [existingPrediction, setExistingPrediction] = useState(null);
   const [showPredictionForm, setShowPredictionForm] = useState(false);
+  const [showMatchPredictions, setShowMatchPredictions] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Admin email - only this user can see Admin tab
@@ -24,10 +26,20 @@ function MainApp() {
     setShowPredictionForm(true);
   };
 
+  const handleViewPredictions = (match) => {
+    setSelectedMatch(match);
+    setShowMatchPredictions(true);
+  };
+
   const handleClosePredictionForm = () => {
     setShowPredictionForm(false);
     setSelectedMatch(null);
     setExistingPrediction(null);
+  };
+
+  const handleCloseMatchPredictions = () => {
+    setShowMatchPredictions(false);
+    setSelectedMatch(null);
   };
 
   const handlePredictionSaved = () => {
@@ -79,7 +91,11 @@ function MainApp() {
 
       <main className="app-main">
         {activeTab === "matches" && (
-          <MatchList key={refreshKey} onSelectMatch={handleSelectMatch} />
+          <MatchList
+            key={refreshKey}
+            onSelectMatch={handleSelectMatch}
+            onViewPredictions={handleViewPredictions}
+          />
         )}
         {activeTab === "leaderboard" && <Leaderboard key={refreshKey} />}
         {activeTab === "admin" && isAdmin && <AdminPanel key={refreshKey} />}
@@ -91,6 +107,13 @@ function MainApp() {
           existingPrediction={existingPrediction}
           onClose={handleClosePredictionForm}
           onSaved={handlePredictionSaved}
+        />
+      )}
+
+      {showMatchPredictions && selectedMatch && (
+        <MatchPredictions
+          match={selectedMatch}
+          onClose={handleCloseMatchPredictions}
         />
       )}
     </div>
