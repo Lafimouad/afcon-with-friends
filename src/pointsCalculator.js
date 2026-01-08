@@ -4,34 +4,29 @@ export const calculatePoints = (
   actualHome,
   actualAway
 ) => {
-  // Exact score
+  // Correct score: 10 points
   if (predictedHome === actualHome && predictedAway === actualAway) {
-    return 6;
+    return 10;
   }
 
   const predictedDiff = predictedHome - predictedAway;
   const actualDiff = actualHome - actualAway;
 
   const predictedWinner =
-    predictedDiff > 0 ? 'home' : predictedDiff < 0 ? 'away' : 'draw';
+    predictedDiff > 0 ? "home" : predictedDiff < 0 ? "away" : "draw";
   const actualWinner =
-    actualDiff > 0 ? 'home' : actualDiff < 0 ? 'away' : 'draw';
+    actualDiff > 0 ? "home" : actualDiff < 0 ? "away" : "draw";
 
-  // Wrong winner -> 0 points
+  // Wrong winner: 0 points
   if (predictedWinner !== actualWinner) {
     return 0;
   }
 
-  // Correct draw (but not exact) -> 4 points
-  if (predictedWinner === 'draw') {
-    return 4;
-  }
-
-  // Correct goal difference (but not exact) -> 4 points
+  // Correct winner + correct goal difference: 6 points
   if (Math.abs(predictedDiff) === Math.abs(actualDiff)) {
-    return 4;
+    return 6;
   }
 
-  // Correct winner only -> 2 points
+  // Correct winner only: 2 points
   return 2;
 };
