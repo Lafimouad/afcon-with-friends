@@ -222,6 +222,253 @@ export default function TournamentStats() {
         0,
       );
 
+      // Hot Streak - Longest consecutive predictions with points
+      const hotStreaks = players
+        .map((player) => {
+          const playerPreds = predictions
+            .filter((p) => p.user_id === player.id)
+            .sort((a, b) => {
+              const matchA = matches.find((m) => m.id === a.match_id);
+              const matchB = matches.find((m) => m.id === b.match_id);
+              return (
+                new Date(matchA?.match_date) - new Date(matchB?.match_date)
+              );
+            });
+
+          let currentStreak = 0;
+          let maxStreak = 0;
+          playerPreds.forEach((p) => {
+            if (p.points_earned > 0) {
+              currentStreak++;
+              maxStreak = Math.max(maxStreak, currentStreak);
+            } else {
+              currentStreak = 0;
+            }
+          });
+
+          return { username: player.username, streak: maxStreak };
+        })
+        .sort((a, b) => b.streak - a.streak)[0];
+
+      // Cold Streak - Longest run without points
+      const coldStreaks = players
+        .map((player) => {
+          const playerPreds = predictions
+            .filter((p) => p.user_id === player.id)
+            .sort((a, b) => {
+              const matchA = matches.find((m) => m.id === a.match_id);
+              const matchB = matches.find((m) => m.id === b.match_id);
+              return (
+                new Date(matchA?.match_date) - new Date(matchB?.match_date)
+              );
+            });
+
+          let currentStreak = 0;
+          let maxStreak = 0;
+          playerPreds.forEach((p) => {
+            if (p.points_earned === 0) {
+              currentStreak++;
+              maxStreak = Math.max(maxStreak, currentStreak);
+            } else {
+              currentStreak = 0;
+            }
+          });
+
+          return { username: player.username, streak: maxStreak };
+        })
+        .filter((s) => s.streak > 0)
+        .sort((a, b) => b.streak - a.streak)[0];
+
+      // Score Variety - Who used the most different scores
+      const scoreVariety = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const uniqueScores = new Set(
+            playerPreds.map(
+              (p) => `${p.predicted_home_score}-${p.predicted_away_score}`,
+            ),
+          );
+          return { username: player.username, count: uniqueScores.size };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Favorite Score - Each player's most predicted score
+      const favoriteScores = players.map((player) => {
+        const playerPreds = predictions.filter((p) => p.user_id === player.id);
+        const scoreCounts = {};
+        playerPreds.forEach((p) => {
+          const key = `${p.predicted_home_score}-${p.predicted_away_score}`;
+          scoreCounts[key] = (scoreCounts[key] || 0) + 1;
+        });
+        const favorite = Object.entries(scoreCounts).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
+        return {
+          username: player.username,
+          score: favorite ? favorite[0] : null,
+          count: favorite ? favorite[1] : 0,
+        };
+      });
+
+      // Home Believer - Most home team wins predicted
+      const homeBelievers = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const homeWins = playerPreds.filter(
+            (p) => p.predicted_home_score > p.predicted_away_score,
+          ).length;
+          return { username: player.username, count: homeWins };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Underdog Picker - Most away team wins predicted
+      const underdogPickers = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const awayWins = playerPreds.filter(
+            (p) => p.predicted_away_score > p.predicted_home_score,
+          ).length;
+          return { username: player.username, count: awayWins };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Most Controversial Match - Widest variety of predictions
+      const controversialMatches = matches
+        .filter((m) => m.is_completed)
+        .map((match) => {
+          const matchPreds = predictions.filter((p) => p.match_id === match.id);
+          const uniquePreds = new Set(
+            matchPreds.map(
+              (p) => `${p.predicted_home_score}-${p.predicted_away_score}`,
+            ),
+          );
+          return { match, variety: uniquePreds.size };
+        })
+        .sort((a, b) => b.variety - a.variety)[0];
+
+      // Unanimous Match - Everyone predicted same winner
+      const unanimousMatches = matches
+        .filter((m) => m.is_completed)
+        .map((match) => {
+          const matchPreds = predictions.filter((p) => p.match_id === match.id);
+          if (matchPreds.length === 0) return null;
+
+          const winners = matchPreds.map((p) =>
+            p.predicted_home_score > p.predicted_away_score
+              ? "home"
+              : p.predicted_away_score > p.predicted_home_score
+                ? "away"
+                : "draw",
+          );
+          const uniqueWinners = new Set(winners);
+
+          return uniqueWinners.size === 1
+            ? { match, winner: winners[0] }
+            : null;
+        })
+        .filter((m) => m !== null)[0];
+
+      // Shock Result - Fewest correct predictions
+      const shockResults = matches
+        .filter((m) => m.is_completed)
+        .map((match) => {
+          const matchPreds = predictions.filter((p) => p.match_id === match.id);
+          const correctPreds = matchPreds.filter((p) => {
+            const predWinner =
+              p.predicted_home_score > p.predicted_away_score
+                ? "home"
+                : p.predicted_away_score > p.predicted_home_score
+                  ? "away"
+                  : "draw";
+            const actualWinner =
+              match.home_score > match.away_score
+                ? "home"
+                : match.away_score > match.home_score
+                  ? "away"
+                  : "draw";
+            return predWinner === actualWinner;
+          }).length;
+          const correctRate =
+            matchPreds.length > 0
+              ? (correctPreds / matchPreds.length) * 100
+              : 0;
+          return {
+            match,
+            correctRate,
+            correctCount: correctPreds,
+            total: matchPreds.length,
+          };
+        })
+        .sort((a, b) => a.correctRate - b.correctRate)[0];
+
+      // Conservative Player - Most low-scoring predictions
+      const conservativePlayers = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const lowScoring = playerPreds.filter(
+            (p) => p.predicted_home_score + p.predicted_away_score <= 2,
+          ).length;
+          return { username: player.username, count: lowScoring };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Goal Fest Believer - Most high-scoring predictions
+      const goalFestBelievers = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const highScoring = playerPreds.filter(
+            (p) => p.predicted_home_score + p.predicted_away_score >= 4,
+          ).length;
+          return { username: player.username, count: highScoring };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Risk Taker - Highest average goal difference predicted
+      const riskTakers = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const avgDiff =
+            playerPreds.reduce(
+              (sum, p) =>
+                sum + Math.abs(p.predicted_home_score - p.predicted_away_score),
+              0,
+            ) / (playerPreds.length || 1);
+          return { username: player.username, avgDiff: avgDiff.toFixed(1) };
+        })
+        .sort((a, b) => parseFloat(b.avgDiff) - parseFloat(a.avgDiff))[0];
+
+      // Clutch Performance - Best in finals/semis (round 4+)
+      const clutchPlayers = players
+        .map((player) => {
+          const clutchPreds = predictions.filter((p) => {
+            const match = matches.find((m) => m.id === p.match_id);
+            return p.user_id === player.id && match && (match.round || 1) >= 4;
+          });
+          const clutchPoints = clutchPreds.reduce(
+            (sum, p) => sum + p.points_earned,
+            0,
+          );
+          return {
+            username: player.username,
+            points: clutchPoints,
+            matches: clutchPreds.length,
+          };
+        })
+        .filter((p) => p.matches > 0)
+        .sort((a, b) => b.points - a.points)[0];
+
       setStats({
         totalMatches,
         totalPredictions,
@@ -249,6 +496,19 @@ export default function TournamentStats() {
         closestMatch,
         biggestBlowout,
         totalGoalsPredicted,
+        hotStreak: hotStreaks,
+        coldStreak: coldStreaks,
+        scoreVariety,
+        favoriteScores,
+        homeBeliever: homeBelievers,
+        underdogPicker: underdogPickers,
+        controversialMatch: controversialMatches,
+        unanimousMatch: unanimousMatches,
+        shockResult: shockResults,
+        conservativePlayer: conservativePlayers,
+        goalFestBeliever: goalFestBelievers,
+        riskTaker: riskTakers,
+        clutchPlayer: clutchPlayers,
       });
     } catch (error) {
       console.error("Error loading stats:", error);
@@ -550,6 +810,206 @@ export default function TournamentStats() {
               </div>
             </div>
           )}
+
+        {/* Hot Streak */}
+        {stats.hotStreak && stats.hotStreak.streak > 1 && (
+          <div className="stat-card">
+            <h3>🔥 Hot Streak</h3>
+            <div className="stat-detail">
+              <strong>{stats.hotStreak.username}</strong> was on fire with{" "}
+              <strong>{stats.hotStreak.streak}</strong> consecutive predictions
+              earning points! 🔥
+            </div>
+          </div>
+        )}
+
+        {/* Cold Streak */}
+        {stats.coldStreak && stats.coldStreak.streak > 1 && (
+          <div className="stat-card">
+            <h3>🥶 Cold Streak</h3>
+            <div className="stat-detail">
+              <strong>{stats.coldStreak.username}</strong> went through a rough
+              patch with <strong>{stats.coldStreak.streak}</strong> predictions
+              in a row without points 😬
+            </div>
+          </div>
+        )}
+
+        {/* Score Variety */}
+        {stats.scoreVariety && (
+          <div className="stat-card">
+            <h3>🎲 Most Creative</h3>
+            <div className="stat-detail">
+              <strong>{stats.scoreVariety.username}</strong> used{" "}
+              <strong>{stats.scoreVariety.count}</strong> different score
+              predictions! The most diverse predictions 🌈
+            </div>
+          </div>
+        )}
+
+        {/* Home Believer */}
+        {stats.homeBeliever && (
+          <div className="stat-card">
+            <h3>🏠 Home Advantage Believer</h3>
+            <div className="stat-detail">
+              <strong>{stats.homeBeliever.username}</strong> backed the home
+              team <strong>{stats.homeBeliever.count}</strong> times! 🏠
+            </div>
+          </div>
+        )}
+
+        {/* Underdog Picker */}
+        {stats.underdogPicker && (
+          <div className="stat-card">
+            <h3>🛫 Underdog Specialist</h3>
+            <div className="stat-detail">
+              <strong>{stats.underdogPicker.username}</strong> predicted away
+              wins <strong>{stats.underdogPicker.count}</strong> times! Always
+              backing the underdogs 💪
+            </div>
+          </div>
+        )}
+
+        {/* Controversial Match */}
+        {stats.controversialMatch && stats.controversialMatch.variety > 3 && (
+          <div className="stat-card">
+            <h3>🎪 Most Controversial Match</h3>
+            <div className="match-display">
+              <div className="teams">
+                {stats.controversialMatch.match.home_team.flag_emoji}{" "}
+                {stats.controversialMatch.match.home_team.name}
+                <strong className="score">
+                  {" "}
+                  {stats.controversialMatch.match.home_score} -{" "}
+                  {stats.controversialMatch.match.away_score}{" "}
+                </strong>
+                {stats.controversialMatch.match.away_team.flag_emoji}{" "}
+                {stats.controversialMatch.match.away_team.name}
+              </div>
+              <div className="total-goals">
+                {stats.controversialMatch.variety} different predictions! Nobody
+                could agree 🤯
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Unanimous Match */}
+        {stats.unanimousMatch && (
+          <div className="stat-card">
+            <h3>🤝 Most Predictable Match</h3>
+            <div className="match-display">
+              <div className="teams">
+                {stats.unanimousMatch.match.home_team.flag_emoji}{" "}
+                {stats.unanimousMatch.match.home_team.name}
+                <strong className="score">
+                  {" "}
+                  {stats.unanimousMatch.match.home_score} -{" "}
+                  {stats.unanimousMatch.match.away_score}{" "}
+                </strong>
+                {stats.unanimousMatch.match.away_team.flag_emoji}{" "}
+                {stats.unanimousMatch.match.away_team.name}
+              </div>
+              <div className="total-goals">
+                Everyone predicted the same winner! 100% agreement 🎯
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Shock Result */}
+        {stats.shockResult && stats.shockResult.correctRate < 50 && (
+          <div className="stat-card">
+            <h3>⚡ Biggest Shock</h3>
+            <div className="match-display">
+              <div className="teams">
+                {stats.shockResult.match.home_team.flag_emoji}{" "}
+                {stats.shockResult.match.home_team.name}
+                <strong className="score">
+                  {" "}
+                  {stats.shockResult.match.home_score} -{" "}
+                  {stats.shockResult.match.away_score}{" "}
+                </strong>
+                {stats.shockResult.match.away_team.flag_emoji}{" "}
+                {stats.shockResult.match.away_team.name}
+              </div>
+              <div className="total-goals">
+                Only {stats.shockResult.correctCount} out of{" "}
+                {stats.shockResult.total} predicted the winner! (
+                {Math.round(stats.shockResult.correctRate)}%) 😱
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Conservative Player */}
+        {stats.conservativePlayer && stats.conservativePlayer.count > 0 && (
+          <div className="stat-card">
+            <h3>🤔 Most Conservative</h3>
+            <div className="stat-detail">
+              <strong>{stats.conservativePlayer.username}</strong> predicted
+              low-scoring games{" "}
+              <strong>{stats.conservativePlayer.count}</strong> times (≤2 goals
+              total) 🛡️
+            </div>
+          </div>
+        )}
+
+        {/* Goal Fest Believer */}
+        {stats.goalFestBeliever && stats.goalFestBeliever.count > 0 && (
+          <div className="stat-card">
+            <h3>💥 Goal Fest Believer</h3>
+            <div className="stat-detail">
+              <strong>{stats.goalFestBeliever.username}</strong> loves action!
+              Predicted <strong>{stats.goalFestBeliever.count}</strong>{" "}
+              high-scoring games (≥4 goals) ⚽⚽⚽
+            </div>
+          </div>
+        )}
+
+        {/* Risk Taker */}
+        {stats.riskTaker && (
+          <div className="stat-card">
+            <h3>🎰 Biggest Risk Taker</h3>
+            <div className="stat-detail">
+              <strong>{stats.riskTaker.username}</strong> predicted the biggest
+              margins on average: <strong>{stats.riskTaker.avgDiff}</strong>{" "}
+              goal difference! Bold predictions 💪
+            </div>
+          </div>
+        )}
+
+        {/* Clutch Player */}
+        {stats.clutchPlayer && stats.clutchPlayer.points > 0 && (
+          <div className="stat-card">
+            <h3>⭐ Clutch Performance</h3>
+            <div className="stat-detail">
+              <strong>{stats.clutchPlayer.username}</strong> saved the best for
+              last! <strong>{stats.clutchPlayer.points}</strong> points in the
+              knockout rounds ({stats.clutchPlayer.matches} matches) 🏆
+            </div>
+          </div>
+        )}
+
+        {/* Favorite Scores */}
+        {stats.favoriteScores && stats.favoriteScores.length > 0 && (
+          <div className="stat-card">
+            <h3>💯 Everyone's Favorite Predictions</h3>
+            <div className="stat-list">
+              {stats.favoriteScores.slice(0, 5).map(
+                (player, idx) =>
+                  player.score && (
+                    <div key={idx} className="stat-item">
+                      <span className="label">{player.username}:</span>
+                      <span className="value">
+                        {player.score} ({player.count}x)
+                      </span>
+                    </div>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
