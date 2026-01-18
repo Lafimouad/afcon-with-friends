@@ -1266,13 +1266,34 @@ export default function TournamentStats() {
           <div className="stat-card">
             <h3>💯 Everyone's Favorite Predictions</h3>
             <div className="stat-list">
-              {stats.favoriteScores.slice(0, 5).map(
+              {stats.favoriteScores.map(
                 (player, idx) =>
                   player.score && (
                     <div key={idx} className="stat-item">
                       <span className="label">{player.username}:</span>
                       <span className="value">
                         {player.score} ({player.count}x)
+                      </span>
+                    </div>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Best Round Performances */}
+        {stats.roundPerformances && stats.roundPerformances.length > 0 && (
+          <div className="stat-card">
+            <h3>📈 Best Round for Each Player</h3>
+            <div className="stat-list">
+              {stats.roundPerformances.map(
+                (perf, idx) =>
+                  perf.round && (
+                    <div key={idx} className="stat-item">
+                      <span className="label">{perf.username}:</span>
+                      <span className="value">
+                        Round {perf.round} ({perf.avgPoints} avg,{" "}
+                        {perf.totalPoints} pts)
                       </span>
                     </div>
                   ),
@@ -1383,27 +1404,6 @@ export default function TournamentStats() {
               <strong>{stats.consensusBreaker.username}</strong> went against
               the majority <strong>{stats.consensusBreaker.count}</strong>{" "}
               times! Not afraid to go their own way 💪
-            </div>
-          </div>
-        )}
-
-        {/* Best Round Performances */}
-        {stats.roundPerformances && stats.roundPerformances.length > 0 && (
-          <div className="stat-card">
-            <h3>📈 Best Round for Each Player</h3>
-            <div className="stat-list">
-              {stats.roundPerformances.slice(0, 5).map(
-                (perf, idx) =>
-                  perf.round && (
-                    <div key={idx} className="stat-item">
-                      <span className="label">{perf.username}:</span>
-                      <span className="value">
-                        Round {perf.round} ({perf.avgPoints} avg,{" "}
-                        {perf.totalPoints} pts)
-                      </span>
-                    </div>
-                  ),
-              )}
             </div>
           </div>
         )}
