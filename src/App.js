@@ -12,7 +12,7 @@ import "./style.css";
 
 function MainApp() {
   const { user, signOut, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("matches");
+  const [activeTab, setActiveTab] = useState("report");
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [existingPrediction, setExistingPrediction] = useState(null);
   const [showPredictionForm, setShowPredictionForm] = useState(false);

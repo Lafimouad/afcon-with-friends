@@ -469,6 +469,267 @@ export default function TournamentStats() {
         .filter((p) => p.matches > 0)
         .sort((a, b) => b.points - a.points)[0];
 
+      // Lone Wolf - Most unique predictions (predictions no one else made)
+      const loneWolves = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const uniquePreds = playerPreds.filter((pred) => {
+            const samePreds = predictions.filter(
+              (p) =>
+                p.match_id === pred.match_id &&
+                p.predicted_home_score === pred.predicted_home_score &&
+                p.predicted_away_score === pred.predicted_away_score,
+            );
+            return samePreds.length === 1;
+          }).length;
+          return { username: player.username, count: uniquePreds };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Almost Perfect - Predictions that were 1 goal off from exact score
+      const almostPerfect = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const almostCount = playerPreds.filter((pred) => {
+            const match = matches.find(
+              (m) => m.id === pred.match_id && m.is_completed,
+            );
+            if (!match) return false;
+            const homeDiff = Math.abs(
+              pred.predicted_home_score - match.home_score,
+            );
+            const awayDiff = Math.abs(
+              pred.predicted_away_score - match.away_score,
+            );
+            return homeDiff + awayDiff === 1;
+          }).length;
+          return { username: player.username, count: almostCount };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Average error margin on goals
+      const avgErrors = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const completedPreds = playerPreds.filter((p) => {
+            const match = matches.find((m) => m.id === p.match_id);
+            return match?.is_completed;
+          });
+
+          if (completedPreds.length === 0)
+            return { username: player.username, error: 999 };
+
+          const totalError = completedPreds.reduce((sum, pred) => {
+            const match = matches.find((m) => m.id === pred.match_id);
+            const homeDiff = Math.abs(
+              pred.predicted_home_score - match.home_score,
+            );
+            const awayDiff = Math.abs(
+              pred.predicted_away_score - match.away_score,
+            );
+            return sum + homeDiff + awayDiff;
+          }, 0);
+
+          return {
+            username: player.username,
+            error: (totalError / completedPreds.length).toFixed(2),
+          };
+        })
+        .sort((a, b) => parseFloat(a.error) - parseFloat(b.error))[0];
+
+      // Most accurate at predicting total goals
+      const goalAccuracy = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const completedPreds = playerPreds.filter((p) => {
+            const match = matches.find((m) => m.id === p.match_id);
+            return match?.is_completed;
+          });
+
+          if (completedPreds.length === 0)
+            return { username: player.username, accuracy: 0 };
+
+          const correctTotals = completedPreds.filter((pred) => {
+            const match = matches.find((m) => m.id === pred.match_id);
+            const predTotal =
+              pred.predicted_home_score + pred.predicted_away_score;
+            const actualTotal = match.home_score + match.away_score;
+            return predTotal === actualTotal;
+          }).length;
+
+          return {
+            username: player.username,
+            accuracy: Math.round((correctTotals / completedPreds.length) * 100),
+            count: correctTotals,
+          };
+        })
+        .sort((a, b) => b.accuracy - a.accuracy)[0];
+
+      // Best at predicting home team scores
+      const homeAccuracy = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const completedPreds = playerPreds.filter((p) => {
+            const match = matches.find((m) => m.id === p.match_id);
+            return match?.is_completed;
+          });
+
+          if (completedPreds.length === 0)
+            return { username: player.username, accuracy: 0 };
+
+          const correctHome = completedPreds.filter((pred) => {
+            const match = matches.find((m) => m.id === pred.match_id);
+            return pred.predicted_home_score === match.home_score;
+          }).length;
+
+          return {
+            username: player.username,
+            accuracy: Math.round((correctHome / completedPreds.length) * 100),
+            count: correctHome,
+          };
+        })
+        .sort((a, b) => b.accuracy - a.accuracy)[0];
+
+      // Best at predicting away team scores
+      const awayAccuracy = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          const completedPreds = playerPreds.filter((p) => {
+            const match = matches.find((m) => m.id === p.match_id);
+            return match?.is_completed;
+          });
+
+          if (completedPreds.length === 0)
+            return { username: player.username, accuracy: 0 };
+
+          const correctAway = completedPreds.filter((pred) => {
+            const match = matches.find((m) => m.id === pred.match_id);
+            return pred.predicted_away_score === match.away_score;
+          }).length;
+
+          return {
+            username: player.username,
+            accuracy: Math.round((correctAway / completedPreds.length) * 100),
+            count: correctAway,
+          };
+        })
+        .sort((a, b) => b.accuracy - a.accuracy)[0];
+
+      // Biggest prediction error (furthest from actual)
+      const biggestErrors = [];
+      predictions.forEach((pred) => {
+        const match = matches.find(
+          (m) => m.id === pred.match_id && m.is_completed,
+        );
+        if (match) {
+          const homeDiff = Math.abs(
+            pred.predicted_home_score - match.home_score,
+          );
+          const awayDiff = Math.abs(
+            pred.predicted_away_score - match.away_score,
+          );
+          const totalError = homeDiff + awayDiff;
+          const player = players.find((p) => p.id === pred.user_id);
+          biggestErrors.push({
+            username: player?.username,
+            match,
+            predicted: `${pred.predicted_home_score}-${pred.predicted_away_score}`,
+            actual: `${match.home_score}-${match.away_score}`,
+            error: totalError,
+          });
+        }
+      });
+      const worstPrediction = biggestErrors.sort(
+        (a, b) => b.error - a.error,
+      )[0];
+
+      // Consensus Breaker - Most predictions against majority
+      const consensusBreakers = players
+        .map((player) => {
+          const playerPreds = predictions.filter(
+            (p) => p.user_id === player.id,
+          );
+          let againstConsensus = 0;
+
+          playerPreds.forEach((pred) => {
+            const matchPreds = predictions.filter(
+              (p) => p.match_id === pred.match_id,
+            );
+            if (matchPreds.length < 3) return;
+
+            const predWinner =
+              pred.predicted_home_score > pred.predicted_away_score
+                ? "home"
+                : pred.predicted_away_score > pred.predicted_home_score
+                  ? "away"
+                  : "draw";
+
+            const winners = matchPreds.map((p) =>
+              p.predicted_home_score > p.predicted_away_score
+                ? "home"
+                : p.predicted_away_score > p.predicted_home_score
+                  ? "away"
+                  : "draw",
+            );
+
+            const winnerCounts = {};
+            winners.forEach(
+              (w) => (winnerCounts[w] = (winnerCounts[w] || 0) + 1),
+            );
+            const majority = Object.entries(winnerCounts).sort(
+              (a, b) => b[1] - a[1],
+            )[0][0];
+
+            if (predWinner !== majority) againstConsensus++;
+          });
+
+          return { username: player.username, count: againstConsensus };
+        })
+        .sort((a, b) => b.count - a.count)[0];
+
+      // Best round performance for each player
+      const roundPerformances = players.map((player) => {
+        const rounds = {};
+        predictions
+          .filter((p) => p.user_id === player.id)
+          .forEach((pred) => {
+            const match = matches.find((m) => m.id === pred.match_id);
+            const round = match?.round || 1;
+            if (!rounds[round]) rounds[round] = { points: 0, matches: 0 };
+            rounds[round].points += pred.points_earned;
+            rounds[round].matches += 1;
+          });
+
+        let bestRound = null;
+        let bestAvg = 0;
+        Object.entries(rounds).forEach(([round, data]) => {
+          const avg = data.points / data.matches;
+          if (avg > bestAvg) {
+            bestAvg = avg;
+            bestRound = round;
+          }
+        });
+
+        return {
+          username: player.username,
+          round: bestRound,
+          avgPoints: bestAvg.toFixed(1),
+          totalPoints: bestRound ? rounds[bestRound].points : 0,
+        };
+      });
+
       setStats({
         totalMatches,
         totalPredictions,
@@ -509,6 +770,15 @@ export default function TournamentStats() {
         goalFestBeliever: goalFestBelievers,
         riskTaker: riskTakers,
         clutchPlayer: clutchPlayers,
+        loneWolf: loneWolves,
+        almostPerfect,
+        avgError: avgErrors,
+        goalAccuracy,
+        homeAccuracy,
+        awayAccuracy,
+        worstPrediction,
+        consensusBreaker: consensusBreakers,
+        roundPerformances,
       });
     } catch (error) {
       console.error("Error loading stats:", error);
@@ -1003,6 +1273,133 @@ export default function TournamentStats() {
                       <span className="label">{player.username}:</span>
                       <span className="value">
                         {player.score} ({player.count}x)
+                      </span>
+                    </div>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Lone Wolf */}
+        {stats.loneWolf && stats.loneWolf.count > 0 && (
+          <div className="stat-card">
+            <h3>🐺 Lone Wolf</h3>
+            <div className="stat-detail">
+              <strong>{stats.loneWolf.username}</strong> made{" "}
+              <strong>{stats.loneWolf.count}</strong> unique predictions that no
+              one else made! Independent thinker 🎯
+            </div>
+          </div>
+        )}
+
+        {/* Almost Perfect */}
+        {stats.almostPerfect && stats.almostPerfect.count > 0 && (
+          <div className="stat-card">
+            <h3>😩 So Close!</h3>
+            <div className="stat-detail">
+              <strong>{stats.almostPerfect.username}</strong> was just 1 goal
+              off from perfect <strong>{stats.almostPerfect.count}</strong>{" "}
+              times! The agony! 😭
+            </div>
+          </div>
+        )}
+
+        {/* Most Accurate Overall */}
+        {stats.avgError && stats.avgError.error < 999 && (
+          <div className="stat-card">
+            <h3>🎯 Most Accurate Overall</h3>
+            <div className="stat-detail">
+              <strong>{stats.avgError.username}</strong> had the lowest average
+              error: <strong>{stats.avgError.error}</strong> goals per match!
+              Precision master 📐
+            </div>
+          </div>
+        )}
+
+        {/* Goal Total Accuracy */}
+        {stats.goalAccuracy && stats.goalAccuracy.accuracy > 0 && (
+          <div className="stat-card">
+            <h3>🔢 Total Goals Prophet</h3>
+            <div className="stat-detail">
+              <strong>{stats.goalAccuracy.username}</strong> predicted the
+              correct total goals{" "}
+              <strong>{stats.goalAccuracy.accuracy}%</strong> of the time (
+              {stats.goalAccuracy.count} matches)! 🎰
+            </div>
+          </div>
+        )}
+
+        {/* Home Score Expert */}
+        {stats.homeAccuracy && stats.homeAccuracy.accuracy > 0 && (
+          <div className="stat-card">
+            <h3>🏠 Home Score Expert</h3>
+            <div className="stat-detail">
+              <strong>{stats.homeAccuracy.username}</strong> nailed the home
+              team score <strong>{stats.homeAccuracy.accuracy}%</strong> of the
+              time ({stats.homeAccuracy.count} matches)! 🎯
+            </div>
+          </div>
+        )}
+
+        {/* Away Score Expert */}
+        {stats.awayAccuracy && stats.awayAccuracy.accuracy > 0 && (
+          <div className="stat-card">
+            <h3>✈️ Away Score Expert</h3>
+            <div className="stat-detail">
+              <strong>{stats.awayAccuracy.username}</strong> predicted away
+              scores perfectly <strong>{stats.awayAccuracy.accuracy}%</strong>{" "}
+              of the time ({stats.awayAccuracy.count} matches)! 🛫
+            </div>
+          </div>
+        )}
+
+        {/* Worst Prediction */}
+        {stats.worstPrediction && stats.worstPrediction.error > 3 && (
+          <div className="stat-card">
+            <h3>😅 Wildest Prediction</h3>
+            <div className="match-display">
+              <div className="teams">
+                {stats.worstPrediction.match.home_team.flag_emoji}{" "}
+                {stats.worstPrediction.match.home_team.name} vs{" "}
+                {stats.worstPrediction.match.away_team.flag_emoji}{" "}
+                {stats.worstPrediction.match.away_team.name}
+              </div>
+              <div className="stat-detail" style={{ marginTop: "0.5rem" }}>
+                <strong>{stats.worstPrediction.username}</strong> predicted{" "}
+                <strong>{stats.worstPrediction.predicted}</strong> but it ended{" "}
+                <strong>{stats.worstPrediction.actual}</strong>! Off by{" "}
+                {stats.worstPrediction.error} goals 🤯
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Consensus Breaker */}
+        {stats.consensusBreaker && stats.consensusBreaker.count > 0 && (
+          <div className="stat-card">
+            <h3>🤘 Rebel</h3>
+            <div className="stat-detail">
+              <strong>{stats.consensusBreaker.username}</strong> went against
+              the majority <strong>{stats.consensusBreaker.count}</strong>{" "}
+              times! Not afraid to go their own way 💪
+            </div>
+          </div>
+        )}
+
+        {/* Best Round Performances */}
+        {stats.roundPerformances && stats.roundPerformances.length > 0 && (
+          <div className="stat-card">
+            <h3>📈 Best Round for Each Player</h3>
+            <div className="stat-list">
+              {stats.roundPerformances.slice(0, 5).map(
+                (perf, idx) =>
+                  perf.round && (
+                    <div key={idx} className="stat-item">
+                      <span className="label">{perf.username}:</span>
+                      <span className="value">
+                        Round {perf.round} ({perf.avgPoints} avg,{" "}
+                        {perf.totalPoints} pts)
                       </span>
                     </div>
                   ),
