@@ -6,6 +6,8 @@ import PredictionForm from "./PredictionForm";
 import MatchPredictions from "./MatchPredictions";
 import Leaderboard from "./Leaderboard";
 import AdminPanel from "./AdminPanel";
+import TournamentStats from "./TournamentStats";
+import FinalReport from "./FinalReport";
 import "./style.css";
 
 function MainApp() {
@@ -79,6 +81,18 @@ function MainApp() {
         >
           Leaderboard
         </button>
+        <button
+          className={`nav-btn ${activeTab === "stats" ? "active" : ""}`}
+          onClick={() => setActiveTab("stats")}
+        >
+          📊 Stats
+        </button>
+        <button
+          className={`nav-btn ${activeTab === "report" ? "active" : ""}`}
+          onClick={() => setActiveTab("report")}
+        >
+          📋 Final Report
+        </button>
         {isAdmin && (
           <button
             className={`nav-btn ${activeTab === "admin" ? "active" : ""}`}
@@ -98,6 +112,8 @@ function MainApp() {
           />
         )}
         {activeTab === "leaderboard" && <Leaderboard key={refreshKey} />}
+        {activeTab === "stats" && <TournamentStats key={refreshKey} />}
+        {activeTab === "report" && <FinalReport key={refreshKey} />}
         {activeTab === "admin" && isAdmin && <AdminPanel key={refreshKey} />}
       </main>
 
