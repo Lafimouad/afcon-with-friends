@@ -6,13 +6,11 @@ import PredictionForm from "./PredictionForm";
 import MatchPredictions from "./MatchPredictions";
 import Leaderboard from "./Leaderboard";
 import AdminPanel from "./AdminPanel";
-import TournamentStats from "./TournamentStats";
-import FinalReport from "./FinalReport";
 import "./style.css";
 
 function MainApp() {
   const { user, signOut, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("report");
+  const [activeTab, setActiveTab] = useState("matches");
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [existingPrediction, setExistingPrediction] = useState(null);
   const [showPredictionForm, setShowPredictionForm] = useState(false);
@@ -20,7 +18,7 @@ function MainApp() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Admin email - only this user can see Admin tab
-  const isAdmin = user?.email === "mouadh@afcon.local";
+  const isAdmin = user?.email === "mouadh@worldcup.local";
 
   const handleSelectMatch = (match, prediction) => {
     setSelectedMatch(match);
@@ -61,7 +59,7 @@ function MainApp() {
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1>AFCON 2025 Predictions</h1>
+          <h1>World Cup 2026 Predictions</h1>
           <button className="btn-logout" onClick={signOut}>
             Sign Out
           </button>
@@ -80,18 +78,6 @@ function MainApp() {
           onClick={() => setActiveTab("leaderboard")}
         >
           Leaderboard
-        </button>
-        <button
-          className={`nav-btn ${activeTab === "stats" ? "active" : ""}`}
-          onClick={() => setActiveTab("stats")}
-        >
-          📊 Stats
-        </button>
-        <button
-          className={`nav-btn ${activeTab === "report" ? "active" : ""}`}
-          onClick={() => setActiveTab("report")}
-        >
-          📋 Final Report
         </button>
         {isAdmin && (
           <button
@@ -112,8 +98,6 @@ function MainApp() {
           />
         )}
         {activeTab === "leaderboard" && <Leaderboard key={refreshKey} />}
-        {activeTab === "stats" && <TournamentStats key={refreshKey} />}
-        {activeTab === "report" && <FinalReport key={refreshKey} />}
         {activeTab === "admin" && isAdmin && <AdminPanel key={refreshKey} />}
       </main>
 

@@ -108,6 +108,27 @@ export default function MatchList({ onSelectMatch, onViewPredictions }) {
     return new Date(match.match_date) <= new Date();
   };
 
+  const formatStageLabel = (match) => {
+    if (match.group_name) {
+      return `Group ${match.group_name}`;
+    }
+
+    if (match.stage === "group_stage") {
+      return `Round ${match.round || 1}`;
+    }
+
+    const stageLabels = {
+      round_of_32: "Round of 32",
+      round_of_16: "Round of 16",
+      quarter_final: "Quarter-final",
+      semi_final: "Semi-final",
+      third_place: "Third place",
+      final: "Final",
+    };
+
+    return stageLabels[match.stage] || "Match";
+  };
+
   // Check if a round is unlocked (previous round completed)
   const isRoundUnlocked = (round) => {
     if (round === 1) return true;
@@ -165,9 +186,7 @@ export default function MatchList({ onSelectMatch, onViewPredictions }) {
               <div key={match.id} className="match-card">
                 {" "}
                 <div className="match-header">
-                  <span className="match-stage">
-                    {match.group_name || match.stage}
-                  </span>
+                  <span className="match-stage">{formatStageLabel(match)}</span>
                   <span className="match-date">
                     {formatDate(match.match_date)}
                   </span>

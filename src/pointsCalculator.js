@@ -4,9 +4,9 @@ export const calculatePoints = (
   actualHome,
   actualAway
 ) => {
-  // Correct score: 20 points
+  // Correct score: 5 points
   if (predictedHome === actualHome && predictedAway === actualAway) {
-    return 20;
+    return 5;
   }
 
   const predictedDiff = predictedHome - predictedAway;
@@ -24,9 +24,9 @@ export const calculatePoints = (
 
   // Correct winner + correct goal difference: 12 points
   if (Math.abs(predictedDiff) === Math.abs(actualDiff)) {
-    return 12;
+    return 2;
   }
 
   // Correct winner only: 4 points
-  return 4;
+  return 1;
 };

@@ -1,11 +1,11 @@
 /*
-  # AFCON 2025 Prediction Game Schema
+  # World Cup 2026 Prediction Game Schema
 
   ## New Tables
 
   ### `teams`
   - `id` (uuid, primary key) - Unique team identifier
-  - `name` (text) - Team name (e.g., "Nigeria", "Egypt")
+  - `name` (text) - Team name (e.g., "Argentina", "France")
   - `flag_emoji` (text) - Flag emoji for display
   - `code` (text) - 3-letter country code
   - `created_at` (timestamptz) - Record creation timestamp
@@ -15,7 +15,8 @@
   - `home_team_id` (uuid, foreign key) - Reference to home team
   - `away_team_id` (uuid, foreign key) - Reference to away team
   - `match_date` (timestamptz) - When the match will be played
-  - `stage` (text) - Tournament stage (group_stage, round_of_16, quarter_final, semi_final, final)
+  - `round` (integer) - Numeric round progression used by the app UI
+  - `stage` (text) - Tournament stage (group_stage, round_of_32, round_of_16, quarter_final, semi_final, third_place, final)
   - `group_name` (text, nullable) - Group identifier for group stage matches
   - `home_score` (integer, nullable) - Final home team score (null until match completed)
   - `away_score` (integer, nullable) - Final away team score (null until match completed)
@@ -73,6 +74,7 @@ CREATE TABLE IF NOT EXISTS matches (
   home_team_id uuid REFERENCES teams(id) NOT NULL,
   away_team_id uuid REFERENCES teams(id) NOT NULL,
   match_date timestamptz NOT NULL,
+  round integer NOT NULL DEFAULT 1,
   stage text NOT NULL DEFAULT 'group_stage',
   group_name text,
   home_score integer,
@@ -167,6 +169,7 @@ CREATE POLICY "Users can update their own predictions before match starts"
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_matches_date ON matches(match_date);
 CREATE INDEX IF NOT EXISTS idx_matches_completed ON matches(is_completed);
+CREATE INDEX IF NOT EXISTS idx_matches_round ON matches(round);
 CREATE INDEX IF NOT EXISTS idx_predictions_user ON predictions(user_id);
 CREATE INDEX IF NOT EXISTS idx_predictions_match ON predictions(match_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_points ON profiles(total_points DESC);

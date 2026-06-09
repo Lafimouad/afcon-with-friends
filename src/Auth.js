@@ -26,7 +26,7 @@ export default function Auth() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>AFCON 2025 Predictions</h1>
+        <h1>World Cup 2026 Predictions</h1>
         <p className="auth-subtitle">
           Predict match scores and compete with friends
         </p>

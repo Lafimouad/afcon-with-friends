@@ -353,7 +353,7 @@ body {
 .match-stage {
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   color: #2c5364;
   background: #e6f0f3;
   padding: 0.25rem 0.625rem;

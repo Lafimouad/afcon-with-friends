@@ -98,7 +98,7 @@ export default function FinalReport() {
     if (!report) return;
 
     const reportText = `
-AFCON 2025 PREDICTION GAME - FINAL REPORT
+  WORLD CUP 2026 PREDICTION GAME - FINAL REPORT
 Generated: ${report.generatedAt}
 ==========================================
 
@@ -138,14 +138,14 @@ ${report.recentMatches
   )
   .join("\n")}
 
-Thank you for participating in AFCON 2025 Predictions!
+Thank you for participating in World Cup 2026 Predictions!
     `.trim();
 
     const blob = new Blob([reportText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "AFCON-2025-Final-Report.txt";
+    a.download = "World-Cup-2026-Final-Report.txt";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -163,7 +163,7 @@ Thank you for participating in AFCON 2025 Predictions!
   return (
     <div className="final-report">
       <div className="report-header">
-        <h2>📋 AFCON 2025 - Final Report</h2>
+        <h2>📋 World Cup 2026 - Final Report</h2>
         <button className="btn-download" onClick={downloadReport}>
           📥 Download Report
         </button>
@@ -181,7 +181,7 @@ Thank you for participating in AFCON 2025 Predictions!
                 {report.winner.total_points} points
               </div>
               <div className="champion-subtitle">
-                AFCON 2025 Prediction Winner
+                World Cup 2026 Prediction Winner
               </div>
             </div>
           </div>
@@ -297,7 +297,7 @@ Thank you for participating in AFCON 2025 Predictions!
 
         {/* Footer */}
         <div className="report-footer">
-          <p>Thank you for participating in AFCON 2025 Predictions! 🎉</p>
+          <p>Thank you for participating in World Cup 2026 Predictions! 🎉</p>
           <p className="generated-at">
             Report generated on {report.generatedAt}
           </p>

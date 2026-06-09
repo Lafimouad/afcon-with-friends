@@ -797,7 +797,7 @@ export default function TournamentStats() {
 
   return (
     <div className="tournament-stats">
-      <h2>🏆 AFCON 2025 Tournament Stats</h2>
+      <h2>🏆 World Cup 2026 Tournament Stats</h2>
 
       <div className="stats-grid">
         {/* Tournament Champion */}

@@ -7,14 +7,15 @@
 -- Create each account with these details:
 
 /*
-Email: wassim@afcon.local | Password: afcon2025 | Username: Wassim
-Email: hamdi@afcon.local | Password: afcon2025 | Username: Hamdi  
-Email: dhia@afcon.local | Password: afcon2025 | Username: Dhia
-Email: mouadh@afcon.local | Password: afcon2025 | Username: Mouadh
-Email: semah@afcon.local | Password: afcon2025 | Username: Semah
-Email: marwen@afcon.local | Password: afcon2025 | Username: Marwen
-Email: anas@afcon.local | Password: afcon2025 | Username: Anas
-Email: amine@afcon.local | Password: afcon2025 | Username: Amine
+Email: wassim@worldcup.local | Password: worldcup2026 | Username: Wassim
+Email: hamdi@worldcup.local | Password: worldcup2026 | Username: Hamdi  
+Email: dhia@worldcup.local | Password: worldcup2026 | Username: Dhia
+Email: mouadh@worldcup.local | Password: worldcup2026 | Username: Mouadh
+Email: semah@worldcup.local | Password: worldcup2026 | Username: Semah
+Email: marwen@worldcup.local | Password: worldcup2026 | Username: Marwen
+Email: anas@worldcup.local | Password: worldcup2026 | Username: Anas
+Email: amine@worldcup.local | Password: worldcup2026 | Username: Amine
+Email: kabil@worldcup.local | Password: worldcup2026 | Username: Kabil
 */
 
 -- OPTION 2: Use Supabase Auth Admin API (Run in SQL Editor with proper permissions)
@@ -51,14 +52,16 @@ $$;
 -- OPTION 3: Easiest approach - Share these credentials with friends
 -- Tell them to use these emails/passwords to sign in:
 
--- Wassim: wassim@afcon.local / afcon2025
--- Hamdi: hamdi@afcon.local / afcon2025
--- Dhia: dhia@afcon.local / afcon2025
--- Mouadh: mouadh@afcon.local / afcon2025
--- Semah: semah@afcon.local / afcon2025
--- Marwen: marwen@afcon.local / afcon2025
--- Anas: anas@afcon.local / afcon2025
--- Amine: amine@afcon.local / afcon2025
+-- Wassim: wassim@worldcup.local / worldcup2026
+-- Hamdi: hamdi@worldcup.local / worldcup2026
+-- Dhia: dhia@worldcup.local / worldcup2026
+-- Mouadh: mouadh@worldcup.local / worldcup2026
+-- Semah: semah@worldcup.local / worldcup2026
+-- Marwen: marwen@worldcup.local / worldcup2026
+-- Anas: anas@worldcup.local / worldcup2026
+-- Amine: amine@worldcup.local / worldcup2026
+-- Kabil: kabil@worldcup.local / worldcup2026
+
 
 -- You need to create these users manually in Supabase Dashboard:
 -- 1. Go to Authentication > Users
