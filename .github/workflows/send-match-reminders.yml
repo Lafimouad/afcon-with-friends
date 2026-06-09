@@ -1,0 +1,36 @@
+name: Send Match Reminders
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger-reminder-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required secrets
+        env:
+          REMINDER_ENDPOINT: ${{ secrets.REMINDER_ENDPOINT }}
+          CRON_AUTH_TOKEN: ${{ secrets.CRON_AUTH_TOKEN }}
+        run: |
+          if [ -z "$REMINDER_ENDPOINT" ]; then
+            echo "Missing GitHub secret: REMINDER_ENDPOINT"
+            exit 1
+          fi
+          if [ -z "$CRON_AUTH_TOKEN" ]; then
+            echo "Missing GitHub secret: CRON_AUTH_TOKEN"
+            exit 1
+          fi
+
+      - name: Call reminder endpoint
+        env:
+          REMINDER_ENDPOINT: ${{ secrets.REMINDER_ENDPOINT }}
+          CRON_AUTH_TOKEN: ${{ secrets.CRON_AUTH_TOKEN }}
+        run: |
+          curl --fail --show-error --silent \
+            --request POST \
+            --header "Authorization: Bearer ${CRON_AUTH_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{"source":"github-actions","mode":"scheduled"}' \
+            "$REMINDER_ENDPOINT"
