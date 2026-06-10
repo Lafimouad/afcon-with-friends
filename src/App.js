@@ -6,6 +6,7 @@ import PredictionForm from "./PredictionForm";
 import MatchPredictions from "./MatchPredictions";
 import Leaderboard from "./Leaderboard";
 import AdminPanel from "./AdminPanel";
+import NotificationToggle from "./NotificationToggle";
 import "./style.css";
 
 function MainApp() {
@@ -60,9 +61,12 @@ function MainApp() {
       <header className="app-header">
         <div className="header-content">
           <h1>World Cup 2026 Predictions</h1>
-          <button className="btn-logout" onClick={signOut}>
-            Sign Out
-          </button>
+          <div className="header-actions">
+            <NotificationToggle />
+            <button className="btn-logout" onClick={signOut}>
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 

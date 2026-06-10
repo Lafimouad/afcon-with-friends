@@ -101,6 +101,9 @@ Use this with the GitHub cron workflow for free scheduled reminder checks.
 	- supabase functions deploy send-reminders --no-verify-jwt
 3. Set edge function secret:
 	- supabase secrets set CRON_AUTH_TOKEN=<your-generated-token>
+	- supabase secrets set VAPID_SUBJECT=<mailto:you@example.com>
+	- supabase secrets set VAPID_PUBLIC_KEY=<your-vapid-public-key>
+	- supabase secrets set VAPID_PRIVATE_KEY=<your-vapid-private-key>
 4. Set GitHub repository secrets:
 	- REMINDER_ENDPOINT=https://<your-project-ref>.functions.supabase.co/send-reminders
 	- CRON_AUTH_TOKEN=<same token as step 3>
@@ -111,4 +114,29 @@ Use this with the GitHub cron workflow for free scheduled reminder checks.
 - Every 5 minutes, GitHub calls the edge function.
 - The function checks matches starting in 25-35 minutes.
 - It logs one reminder event per match in match_reminder_logs (deduplicated).
-- This is the foundation to attach actual push sending next.
+- It sends web push notifications to subscribed browsers.
+
+## Browser Push Subscriptions (Step 1 + 2)
+
+This setup enables users to opt in/out of browser notifications and stores subscriptions in Supabase.
+
+### Files Added
+
+- public/push-sw.js
+- src/NotificationToggle.js
+- supabase/migrations/20260610150000_create_push_subscriptions.sql
+
+### Setup
+
+1. Run migration in Supabase SQL Editor:
+	- supabase/migrations/20260610150000_create_push_subscriptions.sql
+2. Add VAPID public key to environment:
+	- REACT_APP_VAPID_PUBLIC_KEY=<your-public-vapid-key>
+3. Deploy/restart app.
+4. Sign in and click Enable Notifications in header.
+
+### Notes
+
+- Notifications require HTTPS (or localhost in development).
+- On iOS Safari, push works only for installed PWAs (Add to Home Screen).
+- Current reminder function logs due reminders; sending actual web push payloads can be wired next.
