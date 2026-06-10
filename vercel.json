@@ -23,6 +23,10 @@
       "dest": "/manifest.json"
     },
     {
+      "src": "/push-sw.js",
+      "dest": "/push-sw.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
