@@ -36,9 +36,4 @@ export default async function handler(req, res) {
   }
 }
 
-export const crons = [
-  {
-    path: '/api/cron/send-reminders',
-    schedule: '*/5 * * * *',
-  },
-];
+
