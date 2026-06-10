@@ -60,3 +60,55 @@ After Round 1 teams are seeded, run this to add Round 2 real fixtures (GMT+0):
 After Round 2 is seeded, run this to add Round 3 real fixtures (GMT+0):
 
 - supabase/migrations/20260610120000_seed_round3_real_fixtures_gmt0.sql
+
+## GitHub Cron For Match Reminders
+
+This repo includes a GitHub Actions cron workflow that runs every 5 minutes:
+
+- .github/workflows/send-match-reminders.yml
+
+### Setup
+
+1. In GitHub repo settings, open Secrets and variables > Actions.
+2. Add these repository secrets:
+	- REMINDER_ENDPOINT: Your reminder API URL (for example Supabase Edge Function URL)
+	- CRON_AUTH_TOKEN: Shared bearer token checked by your reminder endpoint
+3. Ensure the endpoint accepts POST requests with:
+	- Authorization: Bearer <CRON_AUTH_TOKEN>
+	- JSON body: {"source":"github-actions","mode":"scheduled"}
+4. Push to default branch and confirm the workflow appears under Actions.
+
+### Manual Test
+
+Run workflow_dispatch from the Actions tab to test reminder delivery immediately.
+
+## Supabase Edge Function Setup (Recommended)
+
+Use this with the GitHub cron workflow for free scheduled reminder checks.
+
+### Files Added
+
+- supabase/functions/send-reminders/index.ts
+- supabase/migrations/20260610130000_create_match_reminder_logs.sql
+
+### Step-by-step
+
+1. Run migration in Supabase SQL Editor:
+	- supabase/migrations/20260610130000_create_match_reminder_logs.sql
+2. Deploy edge function (CLI):
+	- supabase login
+	- supabase link --project-ref <your-project-ref>
+	- supabase functions deploy send-reminders --no-verify-jwt
+3. Set edge function secret:
+	- supabase secrets set CRON_AUTH_TOKEN=<your-generated-token>
+4. Set GitHub repository secrets:
+	- REMINDER_ENDPOINT=https://<your-project-ref>.functions.supabase.co/send-reminders
+	- CRON_AUTH_TOKEN=<same token as step 3>
+5. Run GitHub workflow manually once from Actions tab (workflow_dispatch).
+
+### What It Does
+
+- Every 5 minutes, GitHub calls the edge function.
+- The function checks matches starting in 25-35 minutes.
+- It logs one reminder event per match in match_reminder_logs (deduplicated).
+- This is the foundation to attach actual push sending next.
