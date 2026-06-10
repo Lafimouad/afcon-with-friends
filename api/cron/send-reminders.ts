@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     // Call your Supabase function
     const response = await fetch(
-      'https://hwgjqbzpqajpojwcdsbj.functions.supabase.co/send-reminders',
+      'https://hwgjqbzpqajpojwcdsbj.supabase.co/functions/v1/send-reminders',
       {
         method: 'POST',
         headers: {
@@ -35,3 +35,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
+
+export const crons = [
+  {
+    path: '/api/cron/send-reminders',
+    schedule: '*/5 * * * *',
+  },
+];
