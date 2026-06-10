@@ -23,7 +23,7 @@ jobs:
             exit 1
           fi
 
-      - name: Call reminder endpoint
+      - name: Call reminder endpoint 
         env:
           REMINDER_ENDPOINT: ${{ secrets.REMINDER_ENDPOINT }}
           CRON_AUTH_TOKEN: ${{ secrets.CRON_AUTH_TOKEN }}
