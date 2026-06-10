@@ -137,6 +137,6 @@ This setup enables users to opt in/out of browser notifications and stores subsc
 
 ### Notes
 
-- Notifications require HTTPS (or localhost in development).
+- Notifications require HTTPS (or localhost in development level).
 - On iOS Safari, push works only for installed PWAs (Add to Home Screen).
 - Current reminder function logs due reminders; sending actual web push payloads can be wired next.
