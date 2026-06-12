@@ -129,7 +129,7 @@ export default function PredictionForm({ match, existingPrediction, onClose, onS
             <h4>Points System:</h4>
             <ul>
               <li>Exact score: 5 points</li>
-              <li>Correct winner + goal difference: 3 points</li>
+              <li>Correct winner + goal difference: 2 points</li>
               <li>Correct winner only: 1 point</li>
             </ul>
           </div>
