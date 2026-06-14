@@ -650,7 +650,7 @@ body {
 
 .leaderboard-header {
   display: grid;
-  grid-template-columns: 80px 1fr 100px;
+  grid-template-columns: 60px 1fr 80px 70px;
   gap: 1rem;
   padding: 1rem 1.5rem;
   background: linear-gradient(135deg, #0f2027, #2c5364);
@@ -662,7 +662,7 @@ body {
 
 .leaderboard-row {
   display: grid;
-  grid-template-columns: 80px 1fr 100px;
+  grid-template-columns: 60px 1fr 80px 70px;
   gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #eee;
@@ -721,7 +721,16 @@ body {
   align-items: center;
   justify-content: flex-end;
   font-weight: 600;
-  color: #2c5364;
+  color: #888;
+}
+
+.exact-col {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 0.85rem;
+  color: #888;
+  white-space: nowrap;
 }
 
 .admin-panel {
@@ -779,7 +788,7 @@ body {
 
   .leaderboard-header,
   .leaderboard-row {
-    grid-template-columns: 60px 1fr 80px;
+    grid-template-columns: 50px 1fr 65px 55px;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
   }

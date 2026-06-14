@@ -13,14 +13,32 @@ export default function Leaderboard() {
 
   const loadLeaderboard = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('total_points', { ascending: false });
+      const [{ data: profiles, error: profilesError }, { data: exactPreds, error: exactError }] =
+        await Promise.all([
+          supabase.from('profiles').select('*'),
+          supabase
+            .from('predictions')
+            .select('user_id')
+            .eq('points_earned', 5),
+        ]);
 
-      if (error) throw error;
+      if (profilesError) throw profilesError;
+      if (exactError) throw exactError;
 
-      setPlayers(data || []);
+      // Count exact scores per user
+      const exactCounts = {};
+      for (const p of exactPreds || []) {
+        exactCounts[p.user_id] = (exactCounts[p.user_id] || 0) + 1;
+      }
+
+      const ranked = (profiles || [])
+        .map((p) => ({ ...p, exact_score_count: exactCounts[p.id] || 0 }))
+        .sort((a, b) => {
+          if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+          return b.exact_score_count - a.exact_score_count;
+        });
+
+      setPlayers(ranked);
     } catch (error) {
       console.error('Error loading leaderboard:', error);
     } finally {
@@ -43,6 +61,7 @@ export default function Leaderboard() {
             <span className="rank-col">Rank</span>
             <span className="player-col">Player</span>
             <span className="points-col">Points</span>
+            <span className="exact-col">Exact</span>
           </div>
           {players.map((player, index) => (
             <div
@@ -62,6 +81,7 @@ export default function Leaderboard() {
                 {player.id === user.id && <span className="you-badge">You</span>}
               </span>
               <span className="points-col">{player.total_points}</span>
+              <span className="exact-col" title="Exact score predictions">🎯 {player.exact_score_count}</span>
             </div>
           ))}
         </div>
