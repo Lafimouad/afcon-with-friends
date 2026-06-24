@@ -30,7 +30,8 @@ export default function FinalReport() {
         `,
         )
         .eq("is_completed", true)
-        .order("match_date", { ascending: false });
+        .order("match_date", { ascending: false })
+        .order("id", { ascending: true });
 
       if (matchError) throw matchError;
 

@@ -29,7 +29,8 @@ export default function AdminPanel() {
         )
         .eq("is_completed", false)
         .order("round", { ascending: true })
-        .order("match_date", { ascending: true });
+        .order("match_date", { ascending: true })
+        .order("id", { ascending: true });
 
       if (error) throw error;
 

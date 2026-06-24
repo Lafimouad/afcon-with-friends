@@ -26,7 +26,8 @@ export default function MatchList({ onSelectMatch, onViewPredictions }) {
         `
         )
         .order("round", { ascending: true })
-        .order("match_date", { ascending: true });
+        .order("match_date", { ascending: true })
+        .order("id", { ascending: true });
 
       if (matchesError) throw matchesError;
 
