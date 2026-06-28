@@ -7,6 +7,7 @@ import MatchPredictions from "./MatchPredictions";
 import Leaderboard from "./Leaderboard";
 import AdminPanel from "./AdminPanel";
 import NotificationToggle from "./NotificationToggle";
+import GroupStageRecap from "./GroupStageRecap";
 import "./style.css";
 
 function MainApp() {
@@ -83,6 +84,11 @@ function MainApp() {
         >
           Leaderboard
         </button>
+        <button
+          className={`nav-btn ${activeTab === "recap" ? "active" : ""}`}
+          onClick={() => setActiveTab("recap")}
+        >
+ملخص دور المجموعات        </button>
         {isAdmin && (
           <button
             className={`nav-btn ${activeTab === "admin" ? "active" : ""}`}
@@ -102,6 +108,7 @@ function MainApp() {
           />
         )}
         {activeTab === "leaderboard" && <Leaderboard key={refreshKey} />}
+        {activeTab === "recap" && <GroupStageRecap />}
         {activeTab === "admin" && isAdmin && <AdminPanel key={refreshKey} />}
       </main>
 
